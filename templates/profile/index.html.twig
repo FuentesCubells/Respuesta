@@ -1,0 +1,198 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+	<style>
+		.file-uploader {
+			border-right: 1px solid #000;
+			padding-right: 20px;
+		}
+
+		.file-uploader input[type="file"],
+		.create-folder input[type="text"] {
+			border: none;
+			border-bottom: 1px solid #000;
+			border-radius: 0;
+			background-color: transparent;
+		}
+
+		.menu {
+			margin-bottom: 20px;
+		}
+
+		.menu a {
+			font-weight: bold;
+			margin-right: 10px;
+		}
+
+		.folder-icon {
+			width: 100%;
+			text-align: center;
+			margin-bottom: 20px;
+		}
+
+		.folder-icon img {
+			max-width: 100%;
+			height: auto;
+		}
+
+		.folder-name {
+			font-weight: bold;
+		}
+
+		.file-item {
+			width: 100%;
+			margin-bottom: 20px;
+		}
+
+
+		.file-item > img {
+			max-height: 150px;
+			height: auto;
+			object-fit: cover;
+			object-position: center;
+		}
+
+		.file-name {
+			font-weight: bold;
+		}
+
+		.profile-container {
+			max-height: 900px;
+		}
+
+		.user-info {
+			display: flex;
+			align-items: center;
+		}
+
+		.user-info h1 {
+			font-size: 24px;
+			margin-right: 10px;
+		}
+
+		.menu-inline {
+			display: inline-block;
+		}
+
+		.menu-inline a {
+			margin-right: 10px;
+		}
+	</style>
+
+	<div class="container-fluid p-4 profile-container">
+		<div class="row">
+			<div class="col-md-5 file-uploader">
+				<h2>Upload Files</h2>
+				{{ form_start(form_upload, {'method': 'POST', 'enctype': 'multipart/form-data'}) }}
+				<div class="form-group">
+					{{ form_widget(form_upload.files, {'attr': {'class': 'form-control'}}) }}
+				</div>
+				<div class="form-group">
+					{{ form_widget(form_upload.directory, {'attr': {'class': 'form-control'}}) }}
+				</div>
+				<div class="form-group">
+					{{ form_widget(form_upload.submit, {'attr': {'class': 'btn btn-dark btn-block'}}) }}
+				</div>
+				{{ form_end(form_upload) }}
+
+				<h2>My Folders:</h2>
+						<ul class="menu-inline">
+							{% for folder in folders %}
+								<li>
+									<a href="{{ path('app_profile', {'username': user.username, 'folderId': folder.id}) }}">{{ folder.getFolderName() }}</a>
+								</li>
+							{% endfor %}
+						</ul>
+			</div>
+
+			<div class="col-md-7">
+				<div class="row p-5 justify-content-between user-info">
+					<h1>{{ user.username }}</h1>
+					<div class="menu-inline">
+						<a href="{{ path('app_user_folders', {'username': user.username}) }}" class="btn btn-link">Personal Site</a>
+						<a href="{{ path('app_logout') }}" class="btn btn-link">Logout</a>
+					</div>
+				</div>
+				<div class="row display p-5" style="height: 100%; overflow-y: auto;">
+					<div class="row display p-5" style="height: calc(100vh - 400px); overflow-y: auto;">
+						{% if selected_folder %}
+							<h2>Files in
+								{{ selected_folder.getFolderName() }}:</h2>
+							<div class="row">
+								<div class="col-md-3 file-item">
+									<div class="dropdown">
+										<button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="folderOptions" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+											...
+										</button>
+										<div class="dropdown-menu" aria-labelledby="folderOptions">
+											<a class="dropdown-item" href="#">Delete</a>
+											<a class="dropdown-item" href="#">Rename</a>
+										</div>
+									</div>
+								</div>
+								{% for file in selected_folder.files %}
+									<div class="col-md-3 file-item">
+										<img src="{{ file.getPath }}" alt="{{ file.getName() }}" class="img-fluid">
+										<p class="file-name">{{ file.getName() }}</p>
+									</div>
+								{% endfor %}
+							</div>
+						{% endif %}
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}
+{#
+							<!-- Folder Options Modal -->
+					{% for folder in folders %}
+						<div id="folder-options-modal-{{ folder.id }}" class="modal" tabindex="-1" role="dialog">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title">Folder Options</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<ul>
+											<li><a href="{{ path('app_folder_delete', {'folderId': folder.id}) }}">Delete Folder</a></li>
+											<li><a href="{{ path('app_folder_rename', {'folderId': folder.id}) }}">Rename Folder</a></li>
+										</ul>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				
+					<!-- File Options Modal -->
+					{% for file in selected_folder.getFiles() %}
+						<div id="file-options-modal-{{ file.id }}" class="modal" tabindex="-1" role="dialog">
+							<div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title">File Options</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+										<ul>
+											<li>
+												<a href="{{ path('delete_file', {'fileId': file.id}) }}">Delete
+													<li>
+														<a href="{{ path('delete_file', {'fileId': file.id}) }}">Delete File</a>
+													</li>
+													<li>
+														<a href="{{ path('rename_file', {'fileId': file.id}) }}">Rename File</a>
+													</li>
+												</ul>
+											</li>
+										</div>
+									</div>
+								</div>
+							</div>
+						{% endfor %}#}

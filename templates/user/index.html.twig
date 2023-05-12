@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+	{{user.username}}
+{% endblock %}
+
+{% block body %}
+
+	<div class="example-wrapper">
+		<h1>{{ user.username }}'s web</h1>
+
+		<ul>
+			{% for folder in folders %}
+				<li>
+					<a href="{{ path('folder_contents', {id: folder.id}) }}">{{ folder.folderName }}</a>
+					<ul>
+						{% for file in folder.files %}
+							<li>{{ file.name }}</li>
+						{% endfor %}
+					</ul>
+				</li>
+			{% endfor %}
+		</ul>
+
+	</div>
+	
+{% endblock %}
